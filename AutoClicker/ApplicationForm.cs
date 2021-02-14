@@ -12,6 +12,7 @@ namespace AutoClicker
 
         private void ApplicationForm_Load(object sender, EventArgs e)
         {
+
         }
 
         private void ButtonStartAlgorithm_Click(object sender, EventArgs e)

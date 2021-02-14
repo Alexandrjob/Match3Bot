@@ -14,12 +14,14 @@ namespace AutoClicker
         private readonly string processName = "WindowsFormsAppPechenka";
         private readonly ApplicationForm _form;
         private Process _process;
+        private readonly IntPtr _handleGame;
 
         private readonly int _indentLength = 40;
         private readonly int _imageWidthOneGameCell = 38;
         private readonly int _imageHeightOneGameCell = 38;
 
-        private readonly Image<Bgr, byte>[,] images = new Image<Bgr, byte>[8, 8];
+        private const int _sizePlayingFieldInFigures = 8;
+        private readonly Image<Bgr, byte>[,] images = new Image<Bgr, byte>[_sizePlayingFieldInFigures, _sizePlayingFieldInFigures];
         private int[,] fruits = new int[8, 8];
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -37,10 +39,6 @@ namespace AutoClicker
         public GameAlgorithm(ApplicationForm applicationForm)
         {
             _form = applicationForm;
-        }
-
-        public void StartAsync()
-        {
             _process = Process.GetProcessesByName(processName).FirstOrDefault();
 
             if (_process == null)
@@ -49,80 +47,50 @@ namespace AutoClicker
                 _form.labelStateProcces.Refresh();
                 return;
             }
-            else
+
+            _handleGame = _process.MainWindowHandle;
+            _form.labelStateProcces.Text = "Выбранный вами процесс запущен.";
+            _form.labelStateProcces.Refresh();
+        }
+
+        public void StartAsync()
+        {
+            FindAllShapes();
+            RecognizeAllShapes();
+
+            Mouse mouse = new Mouse(_handleGame);
+
+
+            int counterIdenticalАigures;
+
+            for (int i = 0; i < _sizePlayingFieldInFigures; i++)
             {
-                _process.Refresh();
-                _form.labelStateProcces.Text = "Выбранный вами процесс запущен.";
-                _form.labelStateProcces.Refresh();
-            }
-
-            LoodingDefoultImage();
-
-            //Image<Gray, byte> linkedImage = new Image<Gray, byte>("defoult");
-            //Image<Gray, byte> a = new Image<Gray, byte>("defoult");
-
-            //for (int i = 0; i < 8; i++)
-            //{
-            //    for (int j = 0; j < 8; j++)
-            //    {
-            //        var rec = new Rectangle(40 * j, 40 * i, 38, 38);
-            //        linkedImage = linkedImage.Clone();
-            //    }
-            //}
-
-            for (int i = 0; i <= 7; i++)
-            {
-                for (int j = 0; j <= 7; j++)
+                for (int j = 0; j < _sizePlayingFieldInFigures - 2; j++)
                 {
-                    Image<Gray, byte> grayImage = images[i, j].SmoothGaussian(3).Convert<Gray, byte>().ThresholdBinaryInv(new Gray(230), new Gray(255));
-                    VectorOfVectorOfPoint coutours = new VectorOfVectorOfPoint();
-                    Mat hierarchy = new Mat();
-                    CvInvoke.FindContours(grayImage, coutours, hierarchy, Emgu.CV.CvEnum.RetrType.External, Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);
-
-                    VectorOfPoint approximation = new VectorOfPoint();
-                    double perimeter = CvInvoke.ArcLength(coutours[0], true);
-                    CvInvoke.ApproxPolyDP(coutours[0], approximation, 0.04 * perimeter, true);
-                    CvInvoke.DrawContours(grayImage, coutours, 0, new MCvScalar(0, 0, 255), 1);
-                    Moments moments = CvInvoke.Moments(coutours[0]);
-
-                    int x = (int)(moments.M10 / moments.M00);
-                    int y = (int)(moments.M01 / moments.M00);
-
-                    if (approximation.Size == Convert.ToInt32(Fruits.Triangle))
+                    if (fruits[i, j] == fruits[i, j + 2])
                     {
-                        if (approximation.ToArray()[1].Y == approximation.ToArray()[2].Y)
+                        if (i != 0)
                         {
-                            CvInvoke.PutText(grayImage, "T", new Point(x, y), Emgu.CV.CvEnum.FontFace.HersheyPlain, 1, new MCvScalar(255, 0, 0), 1);
+                            if (fruits[i, j] == fruits[i - 1, j + 1])
+                            {
+                                mouse.Move(j * 40 + 60, i * 40 - 20);
+                            }
                         }
-                        else
+                        if (i <= 6)
                         {
-                            CvInvoke.PutText(grayImage, "RT", new Point(x, y), Emgu.CV.CvEnum.FontFace.HersheyPlain, 1, new MCvScalar(255, 0, 0), 1);
+                            if (fruits[i, j] == fruits[i + 1, j + 1])
+                            {
+                                mouse.Move(j * 40 + 60, i * 40 + 60);
+                            }
                         }
                     }
-                    else if (approximation.Size == Convert.ToInt32(Fruits.Square))
-                    {
-                        CvInvoke.PutText(grayImage, "K", new Point(x, y), Emgu.CV.CvEnum.FontFace.HersheyPlain, 1, new MCvScalar(255, 0, 0), 1);
-                    }
-                    else if (approximation.Size > Convert.ToInt32(Fruits.Square))
-                    {
-                        if (approximation.ToArray()[2].Y == approximation.ToArray()[4].Y)
-                        {
-                            CvInvoke.PutText(grayImage, "Kr", new Point(x, y), Emgu.CV.CvEnum.FontFace.HersheyPlain, 1, new MCvScalar(255, 0, 0), 1);
-                        }
-                        else
-                        {
-                            CvInvoke.PutText(grayImage, "Krg", new Point(x - 10, y), Emgu.CV.CvEnum.FontFace.HersheyPlain, 1, new MCvScalar(255, 0, 0), 1);
-                        }
-                    }
-
-                    _form.pictureBoxContoursImage.Image = grayImage.ToBitmap();
-                    _form.pictureBoxContoursImage.Refresh();
                 }
             }
         }
 
-        private void LoodingDefoultImage()
+        private void FindAllShapes()
         {
+            _process.Refresh();
             var hwnd = _process.MainWindowHandle;
             GetWindowRect(hwnd, out var rect);
 
@@ -142,25 +110,80 @@ namespace AutoClicker
             _form.pictureBoxDefoultImage.Refresh();
 
             GetImagesShapes(image);
-
-            _form.pictureBoxDefoultImage.Image = image;
-            _form.pictureBoxDefoultImage.Refresh();
         }
 
         private void GetImagesShapes(Bitmap image)
         {
-            for (int i = 0; i < images.Length; i++)
+            for (int i = 0; i < _sizePlayingFieldInFigures; i++)
             {
-                for (int j = 0; j < images.Length; j++)
+                for (int j = 0; j < _sizePlayingFieldInFigures; j++)
                 {
                     var rec = new Rectangle(_indentLength * j, _indentLength * i, _imageWidthOneGameCell, _imageHeightOneGameCell);
                     var newImage = image.Clone(rec, image.PixelFormat);
                     images[i, j] = new Image<Bgr, byte>(newImage);
-                    _form.pictureBoxDefoultImage.Image = newImage;
-                    _form.pictureBoxDefoultImage.Refresh();
                 }
+            }
+        }
+
+        private void RecognizeAllShapes()
+        {
+            for (int i = 0; i <= _sizePlayingFieldInFigures - 1; i++)
+            {
+                for (int j = 0; j <= _sizePlayingFieldInFigures - 1; j++)
+                {
+                    Image<Gray, byte> grayImage = images[i, j].SmoothGaussian(3).Convert<Gray, byte>().ThresholdBinaryInv(new Gray(230), new Gray(255));
+                    VectorOfVectorOfPoint coutours = new VectorOfVectorOfPoint();
+                    Mat hierarchy = new Mat();
+                    CvInvoke.FindContours(grayImage, coutours, hierarchy, Emgu.CV.CvEnum.RetrType.External, Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);
+
+                    VectorOfPoint approximation = new VectorOfPoint();
+                    double perimeter = CvInvoke.ArcLength(coutours[0], true);
+                    CvInvoke.ApproxPolyDP(coutours[0], approximation, 0.04 * perimeter, true);
+                    CvInvoke.DrawContours(grayImage, coutours, 0, new MCvScalar(0, 0, 255), 1);
+
+                    if (approximation.Size == Convert.ToInt32(Fruits.Triangle))
+                    {
+                        if (approximation.ToArray()[1].Y == approximation.ToArray()[2].Y)
+                        {
+                            fruits[i, j] = Convert.ToInt32(Fruits.Triangle);
+                        }
+                        else
+                        {
+                            fruits[i, j] = Convert.ToInt32(Fruits.InvertedTriangle);
+                        }
+                    }
+                    else if (approximation.Size == Convert.ToInt32(Fruits.Square))
+                    {
+                        fruits[i, j] = Convert.ToInt32(Fruits.Square);
+                    }
+                    else if (approximation.Size > Convert.ToInt32(Fruits.Square))
+                    {
+                        if (approximation.ToArray()[2].Y == approximation.ToArray()[4].Y)
+                        {
+                            fruits[i, j] = Convert.ToInt32(Fruits.Сross);
+                        }
+                        else
+                        {
+                            fruits[i, j] = Convert.ToInt32(Fruits.Сircle);
+                        }
+                    }
+
+                    _form.pictureBoxContoursImage.Image = grayImage.ToBitmap();
+                    _form.pictureBoxContoursImage.Refresh();
+                }
+            }
+        }
+
+        public void ShowArray()
+        {
+            for (int i = 0; i < _sizePlayingFieldInFigures; i++)
+            {
+                for (int j = 0; j < _sizePlayingFieldInFigures; j++)
+                {
+                    Console.Write(fruits[i, j]);
+                }
+                Console.WriteLine();
             }
         }
     }
 }
-
