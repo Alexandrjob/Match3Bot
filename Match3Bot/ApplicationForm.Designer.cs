@@ -1,5 +1,5 @@
 ﻿
-namespace AutoClicker
+namespace Match3Bot
 {
     partial class ApplicationForm
     {

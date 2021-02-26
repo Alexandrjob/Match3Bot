@@ -1,4 +1,4 @@
-﻿namespace AutoClicker
+﻿namespace Match3Bot
 {
     enum Fruits
     {

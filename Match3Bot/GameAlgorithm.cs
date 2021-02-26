@@ -7,16 +7,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace AutoClicker
+namespace Match3Bot
 {
     class GameAlgorithm: IDisposable
     {
         private readonly ApplicationForm _form;
         private readonly WindowGame windowGame;
 
-        private readonly int _indentLength = 40;
-        private readonly int _imageWidthOneGameCell = 38;
-        private readonly int _imageHeightOneGameCell = 38;
+        private readonly int _cellSize = 40;
 
         private const int _sizePlayingFieldInFigures = 8;
         private readonly Image<Bgr, byte>[,] images = new Image<Bgr, byte>[_sizePlayingFieldInFigures, _sizePlayingFieldInFigures];
@@ -62,10 +60,11 @@ namespace AutoClicker
                 await RecognizeAllShapesAsync();
                 await RunningGameAlgorithmAsync();
                 if (Control.ModifierKeys == Keys.Shift)
-{
+                {
                     isStopGame = true;
                 }
                 ShowArray();
+                Thread.Sleep(1000);
             }
         }
 
@@ -131,7 +130,7 @@ namespace AutoClicker
             {
                 for (int j = 0; j < _sizePlayingFieldInFigures; j++)
                 {
-                    var rec = new Rectangle(_indentLength * j, _indentLength * i, _imageWidthOneGameCell, _imageHeightOneGameCell);
+                    var rec = new Rectangle(_cellSize * j, _cellSize * i, _cellSize, _cellSize);
                     var newImage = image.Clone(rec, image.PixelFormat);
                     images[i, j] = new Image<Bgr, byte>(newImage);
                 }
@@ -140,7 +139,7 @@ namespace AutoClicker
 
         private Image<Bgr, byte> GetImageShape(int i, int j)
         {
-            var rec = new Rectangle(_indentLength * j, _indentLength * i, _imageWidthOneGameCell, _imageHeightOneGameCell);
+            var rec = new Rectangle(_cellSize * j, _cellSize * i, _cellSize, _cellSize);
             var newImage = image.Clone(rec, image.PixelFormat);
             return new Image<Bgr, byte>(newImage);
         }
@@ -160,7 +159,7 @@ namespace AutoClicker
                 for (int j = 0; j <= _sizePlayingFieldInFigures - 1; j++)
                 {
                     //Image<Gray, byte> grayImage = images[i,j].SmoothGaussian(3).Convert<Gray, byte>().ThresholdBinaryInv(new Gray(230), new Gray(255));
-                    Image<Gray, byte> grayImage = GetImageShape(i,j).SmoothGaussian(3).Convert<Gray, byte>().ThresholdBinaryInv(new Gray(230), new Gray(255));
+                    Image<Gray, byte> grayImage = GetImageShape(i, j).SmoothGaussian(3).Convert<Gray, byte>().ThresholdBinaryInv(new Gray(230), new Gray(255));
                     VectorOfVectorOfPoint coutours = new VectorOfVectorOfPoint();
                     Mat hierarchy = new Mat();
                     CvInvoke.FindContours(grayImage, coutours, hierarchy, Emgu.CV.CvEnum.RetrType.External, Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);
@@ -214,7 +213,7 @@ namespace AutoClicker
         {
             Mouse mouse = new Mouse(windowGame.GetHandleGame());
 
-            if(!isPlayingFieldEmptyFields)
+            if (!isPlayingFieldEmptyFields)
             {
                 for (int i = 0; i < _sizePlayingFieldInFigures; i++)
                 {
@@ -226,8 +225,8 @@ namespace AutoClicker
                             {
                                 if (fruits[i, j] == fruits[i - 1, j + 1])
                                 {
-                                    Point point1 = new Point(j * 40 + 60, i * 40 + 20);
-                                    Point point2 = new Point(j * 40 + 60, i * 40 - 20);
+                                    Point point1 = new Point(j * _cellSize + 60, i * _cellSize + 20);
+                                    Point point2 = new Point(j * _cellSize + 60, i * _cellSize - 20);
                                     mouse.MoveShape(point1, point2);
                                     return;
                                 }
@@ -236,8 +235,46 @@ namespace AutoClicker
                             {
                                 if (fruits[i, j] == fruits[i + 1, j + 1])
                                 {
-                                    Point point1 = new Point(j * 40 + 60, i * 40 + 20);
-                                    Point point2 = new Point(j * 40 + 60, i * 40 + 60);
+                                    Point point1 = new Point(j * _cellSize + 60, i * _cellSize + 20);
+                                    Point point2 = new Point(j * _cellSize + 60, i * _cellSize + 60);
+                                    mouse.MoveShape(point1, point2);
+                                    return;
+                                }
+                            }
+                        }
+
+                        if (fruits[i, j] == fruits[i, j + 1])
+                        {
+                            if (i < 7 & j > 0 & j < 7)
+                            {
+                                if (fruits[i, j] == fruits[i + 1, j - 1])
+                                {
+                                    Point point1 = new Point(j * _cellSize - 20, i * _cellSize + 60);
+                                    Point point2 = new Point(j * _cellSize - 20, i * _cellSize + 20);
+                                    mouse.MoveShape(point1, point2);
+                                    return;
+                                }
+                                else if (fruits[i, j] == fruits[i + 1, j + 2])
+                                {
+                                    Point point1 = new Point(j * _cellSize + 100, i * _cellSize + 60);
+                                    Point point2 = new Point(j * _cellSize + 100, i * _cellSize + 20);
+                                    mouse.MoveShape(point1, point2);
+                                    return;
+                                }
+                            }
+                            if (i > 0 & j > 0 & j < 7)
+                            {
+                                if (fruits[i, j] == fruits[i - 1, j - 1])
+                                {
+                                    Point point1 = new Point(j * _cellSize - 20, i * _cellSize - 20);
+                                    Point point2 = new Point(j * _cellSize - 20, i * _cellSize + 20);
+                                    mouse.MoveShape(point1, point2);
+                                    return;
+                                }
+                                else if (fruits[i, j] == fruits[i - 1, j + 2])
+                                {
+                                    Point point1 = new Point(j * _cellSize + 100, i * _cellSize - 20);
+                                    Point point2 = new Point(j * _cellSize + 100, i * _cellSize + 20);
                                     mouse.MoveShape(point1, point2);
                                     return;
                                 }

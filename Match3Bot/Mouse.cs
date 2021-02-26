@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace AutoClicker
+namespace Match3Bot
 {
     class Mouse
     {

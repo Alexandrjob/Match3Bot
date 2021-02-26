@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace AutoClicker
+namespace Match3Bot
 {
     static class Program
     {

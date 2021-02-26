@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace AutoClicker
+namespace Match3Bot
 {
     public partial class ApplicationForm: Form
     {
