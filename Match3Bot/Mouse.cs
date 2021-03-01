@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace Match3Bot
 {
-    class Mouse
+    public class Mouse
     {
         public int ScreenWight { get; set; }
         public int ScreenHeight { get; set; }

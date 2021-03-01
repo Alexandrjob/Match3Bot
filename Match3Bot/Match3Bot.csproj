@@ -113,8 +113,12 @@
     <Compile Include="ApplicationForm.Designer.cs">
       <DependentUpon>ApplicationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Service\CombinationCommand.cs" />
+    <Compile Include="Service\Commands\BetweenTwoFiguresCommand.cs" />
+    <Compile Include="Service\Commands\CommandService.cs" />
     <Compile Include="Fruits.cs" />
     <Compile Include="GameAlgorithm.cs" />
+    <Compile Include="Service\ICommandService.cs" />
     <Compile Include="Mouse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

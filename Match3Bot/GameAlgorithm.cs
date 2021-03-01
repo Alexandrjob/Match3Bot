@@ -2,6 +2,7 @@
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,9 +14,9 @@ namespace Match3Bot
     {
         private readonly ApplicationForm _form;
         private readonly WindowGame windowGame;
+        private readonly ICommandService commandService;
 
         private readonly int _cellSize = 40;
-
         private const int _sizePlayingFieldInFigures = 8;
         private readonly Image<Bgr, byte>[,] images = new Image<Bgr, byte>[_sizePlayingFieldInFigures, _sizePlayingFieldInFigures];
         private int[,] fruits = new int[8, 8];
@@ -31,6 +32,7 @@ namespace Match3Bot
             {
                 windowGame = new WindowGame();
                 DisplayProcessState("Выбранный вами процесс запущен.");
+                commandService = new CommandService();
             }
             catch (Exception e)
             {
@@ -215,73 +217,82 @@ namespace Match3Bot
 
             if (!isPlayingFieldEmptyFields)
             {
-                for (int i = 0; i < _sizePlayingFieldInFigures; i++)
+                foreach (var item in commandService.GetCommands())
                 {
-                    for (int j = 0; j < _sizePlayingFieldInFigures - 2; j++)
+                    if (item.Contains(fruits))
                     {
-                        if (fruits[i, j] == fruits[i, j + 2])
-                        {
-                            if (i != 0)
-                            {
-                                if (fruits[i, j] == fruits[i - 1, j + 1])
-                                {
-                                    Point point1 = new Point(j * _cellSize + 60, i * _cellSize + 20);
-                                    Point point2 = new Point(j * _cellSize + 60, i * _cellSize - 20);
-                                    mouse.MoveShape(point1, point2);
-                                    return;
-                                }
-                            }
-                            else if (i <= 7)
-                            {
-                                if (fruits[i, j] == fruits[i + 1, j + 1])
-                                {
-                                    Point point1 = new Point(j * _cellSize + 60, i * _cellSize + 20);
-                                    Point point2 = new Point(j * _cellSize + 60, i * _cellSize + 60);
-                                    mouse.MoveShape(point1, point2);
-                                    return;
-                                }
-                            }
-                        }
-
-                        if (fruits[i, j] == fruits[i, j + 1])
-                        {
-                            if (i < 7 & j > 0 & j < 7)
-                            {
-                                if (fruits[i, j] == fruits[i + 1, j - 1])
-                                {
-                                    Point point1 = new Point(j * _cellSize - 20, i * _cellSize + 60);
-                                    Point point2 = new Point(j * _cellSize - 20, i * _cellSize + 20);
-                                    mouse.MoveShape(point1, point2);
-                                    return;
-                                }
-                                else if (fruits[i, j] == fruits[i + 1, j + 2])
-                                {
-                                    Point point1 = new Point(j * _cellSize + 100, i * _cellSize + 60);
-                                    Point point2 = new Point(j * _cellSize + 100, i * _cellSize + 20);
-                                    mouse.MoveShape(point1, point2);
-                                    return;
-                                }
-                            }
-                            if (i > 0 & j > 0 & j < 7)
-                            {
-                                if (fruits[i, j] == fruits[i - 1, j - 1])
-                                {
-                                    Point point1 = new Point(j * _cellSize - 20, i * _cellSize - 20);
-                                    Point point2 = new Point(j * _cellSize - 20, i * _cellSize + 20);
-                                    mouse.MoveShape(point1, point2);
-                                    return;
-                                }
-                                else if (fruits[i, j] == fruits[i - 1, j + 2])
-                                {
-                                    Point point1 = new Point(j * _cellSize + 100, i * _cellSize - 20);
-                                    Point point2 = new Point(j * _cellSize + 100, i * _cellSize + 20);
-                                    mouse.MoveShape(point1, point2);
-                                    return;
-                                }
-                            }
-                        }
+                        item.Execute(fruits, mouse);
                     }
                 }
+                #region
+                //for (int i = 0; i < _sizePlayingFieldInFigures; i++)
+                //{
+                //    for (int j = 0; j < _sizePlayingFieldInFigures - 2; j++)
+                //    {
+                //        if (fruits[i, j] == fruits[i, j + 2])
+                //        {
+                //            if (i != 0)
+                //            {
+                //                if (fruits[i, j] == fruits[i - 1, j + 1])
+                //                {
+                //                    Point point1 = new Point(j * _cellSize + 60, i * _cellSize + 20);
+                //                    Point point2 = new Point(j * _cellSize + 60, i * _cellSize - 20);
+                //                    mouse.MoveShape(point1, point2);
+                //                    return;
+                //                }
+                //            }
+                //            else if (i <= 7)
+                //            {
+                //                if (fruits[i, j] == fruits[i + 1, j + 1])
+                //                {
+                //                    Point point1 = new Point(j * _cellSize + 60, i * _cellSize + 20);
+                //                    Point point2 = new Point(j * _cellSize + 60, i * _cellSize + 60);
+                //                    mouse.MoveShape(point1, point2);
+                //                    return;
+                //                }
+                //            }
+                //        }
+
+                //        if (fruits[i, j] == fruits[i, j + 1])
+                //        {
+                //            if (i < 7 & j > 0 & j < 7)
+                //            {
+                //                if (fruits[i, j] == fruits[i + 1, j - 1])
+                //                {
+                //                    Point point1 = new Point(j * _cellSize - 20, i * _cellSize + 60);
+                //                    Point point2 = new Point(j * _cellSize - 20, i * _cellSize + 20);
+                //                    mouse.MoveShape(point1, point2);
+                //                    return;
+                //                }
+                //                else if (fruits[i, j] == fruits[i + 1, j + 2])
+                //                {
+                //                    Point point1 = new Point(j * _cellSize + 100, i * _cellSize + 60);
+                //                    Point point2 = new Point(j * _cellSize + 100, i * _cellSize + 20);
+                //                    mouse.MoveShape(point1, point2);
+                //                    return;
+                //                }
+                //            }
+                //            if (i > 0 & j > 0 & j < 7)
+                //            {
+                //                if (fruits[i, j] == fruits[i - 1, j - 1])
+                //                {
+                //                    Point point1 = new Point(j * _cellSize - 20, i * _cellSize - 20);
+                //                    Point point2 = new Point(j * _cellSize - 20, i * _cellSize + 20);
+                //                    mouse.MoveShape(point1, point2);
+                //                    return;
+                //                }
+                //                else if (fruits[i, j] == fruits[i - 1, j + 2])
+                //                {
+                //                    Point point1 = new Point(j * _cellSize + 100, i * _cellSize - 20);
+                //                    Point point2 = new Point(j * _cellSize + 100, i * _cellSize + 20);
+                //                    mouse.MoveShape(point1, point2);
+                //                    return;
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
+                #endregion
             }
         }
 
