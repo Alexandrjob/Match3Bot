@@ -1,6 +1,6 @@
-﻿namespace Match3Bot
+﻿namespace Match3Bot.Models
 {
-    enum Fruits
+    enum Figures
     {
         defoult,
         InvertedTriangle,

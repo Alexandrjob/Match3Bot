@@ -1,4 +1,4 @@
-﻿namespace Match3Bot.Service
+﻿namespace Match3Bot.Models
 {
     public class Box
     {

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Match3Bot.Service.Commands;
+using Match3Bot.Models;
 
 namespace Match3Bot
 {
@@ -177,30 +178,30 @@ namespace Match3Bot
                     CvInvoke.ApproxPolyDP(coutours[0], approximation, 0.04 * perimeter, true);
                     CvInvoke.DrawContours(grayImage, coutours, 0, new MCvScalar(0, 0, 255), 1);
 
-                    if (approximation.Size == Convert.ToInt32(Fruits.Triangle))
+                    if (approximation.Size == Convert.ToInt32(Figures.Triangle))
                     {
                         if (approximation.ToArray()[1].Y == approximation.ToArray()[2].Y)
                         {
-                            figures[i, j] = Convert.ToInt32(Fruits.Triangle);
+                            figures[i, j] = Convert.ToInt32(Figures.Triangle);
                         }
                         else
                         {
-                            figures[i, j] = Convert.ToInt32(Fruits.InvertedTriangle);
+                            figures[i, j] = Convert.ToInt32(Figures.InvertedTriangle);
                         }
                     }
-                    else if (approximation.Size == Convert.ToInt32(Fruits.Square))
+                    else if (approximation.Size == Convert.ToInt32(Figures.Square))
                     {
-                        figures[i, j] = Convert.ToInt32(Fruits.Square);
+                        figures[i, j] = Convert.ToInt32(Figures.Square);
                     }
-                    else if (approximation.Size > Convert.ToInt32(Fruits.Square))
+                    else if (approximation.Size > Convert.ToInt32(Figures.Square))
                     {
                         if (approximation.ToArray()[2].Y == approximation.ToArray()[4].Y)
                         {
-                            figures[i, j] = Convert.ToInt32(Fruits.Сross);
+                            figures[i, j] = Convert.ToInt32(Figures.Сross);
                         }
                         else
                         {
-                            figures[i, j] = Convert.ToInt32(Fruits.Сircle);
+                            figures[i, j] = Convert.ToInt32(Figures.Сircle);
                         }
                     }
                 }
