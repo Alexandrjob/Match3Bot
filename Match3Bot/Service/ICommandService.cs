@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Match3Bot
+namespace Match3Bot.Service
 {
     public interface ICommandService
     {

@@ -1,12 +1,13 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using Match3Bot.Service;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Match3Bot.Service.Commands;
 
 namespace Match3Bot
 {
@@ -19,7 +20,7 @@ namespace Match3Bot
         private readonly int _cellSize = 40;
         private const int _sizePlayingFieldInFigures = 8;
         private readonly Image<Bgr, byte>[,] images = new Image<Bgr, byte>[_sizePlayingFieldInFigures, _sizePlayingFieldInFigures];
-        private int[,] fruits = new int[8, 8];
+        private int[,] figures = new int[8, 8];
         private Bitmap image;
 
         private bool isPlayingFieldEmptyFields = false;
@@ -141,7 +142,7 @@ namespace Match3Bot
 
         private Image<Bgr, byte> GetImageShape(int i, int j)
         {
-            var rec = new Rectangle(_cellSize * j, _cellSize * i, _cellSize, _cellSize);
+            var rec = new Rectangle(_cellSize * j, _cellSize * i, _cellSize - 2, _cellSize - 2);
             var newImage = image.Clone(rec, image.PixelFormat);
             return new Image<Bgr, byte>(newImage);
         }
@@ -153,7 +154,7 @@ namespace Match3Bot
 
         private void RecognizeAllShapes()
         {
-            fruits = new int[8, 8];
+            figures = new int[8, 8];
             isPlayingFieldEmptyFields = false;
 
             for (int i = 0; i <= _sizePlayingFieldInFigures - 1; i++)
@@ -180,26 +181,26 @@ namespace Match3Bot
                     {
                         if (approximation.ToArray()[1].Y == approximation.ToArray()[2].Y)
                         {
-                            fruits[i, j] = Convert.ToInt32(Fruits.Triangle);
+                            figures[i, j] = Convert.ToInt32(Fruits.Triangle);
                         }
                         else
                         {
-                            fruits[i, j] = Convert.ToInt32(Fruits.InvertedTriangle);
+                            figures[i, j] = Convert.ToInt32(Fruits.InvertedTriangle);
                         }
                     }
                     else if (approximation.Size == Convert.ToInt32(Fruits.Square))
                     {
-                        fruits[i, j] = Convert.ToInt32(Fruits.Square);
+                        figures[i, j] = Convert.ToInt32(Fruits.Square);
                     }
                     else if (approximation.Size > Convert.ToInt32(Fruits.Square))
                     {
                         if (approximation.ToArray()[2].Y == approximation.ToArray()[4].Y)
                         {
-                            fruits[i, j] = Convert.ToInt32(Fruits.Сross);
+                            figures[i, j] = Convert.ToInt32(Fruits.Сross);
                         }
                         else
                         {
-                            fruits[i, j] = Convert.ToInt32(Fruits.Сircle);
+                            figures[i, j] = Convert.ToInt32(Fruits.Сircle);
                         }
                     }
                 }
@@ -217,82 +218,27 @@ namespace Match3Bot
 
             if (!isPlayingFieldEmptyFields)
             {
-                foreach (var item in commandService.GetCommands())
+                for (int i = 0; i < _sizePlayingFieldInFigures; i++)
                 {
-                    if (item.Contains(fruits))
+                    for (int j = 0; j < _sizePlayingFieldInFigures - 2; j++)
                     {
-                        item.Execute(fruits, mouse);
-                    }
-                }
-                #region
-                //for (int i = 0; i < _sizePlayingFieldInFigures; i++)
-                //{
-                //    for (int j = 0; j < _sizePlayingFieldInFigures - 2; j++)
-                //    {
-                //        if (fruits[i, j] == fruits[i, j + 2])
-                //        {
-                //            if (i != 0)
-                //            {
-                //                if (fruits[i, j] == fruits[i - 1, j + 1])
-                //                {
-                //                    Point point1 = new Point(j * _cellSize + 60, i * _cellSize + 20);
-                //                    Point point2 = new Point(j * _cellSize + 60, i * _cellSize - 20);
-                //                    mouse.MoveShape(point1, point2);
-                //                    return;
-                //                }
-                //            }
-                //            else if (i <= 7)
-                //            {
-                //                if (fruits[i, j] == fruits[i + 1, j + 1])
-                //                {
-                //                    Point point1 = new Point(j * _cellSize + 60, i * _cellSize + 20);
-                //                    Point point2 = new Point(j * _cellSize + 60, i * _cellSize + 60);
-                //                    mouse.MoveShape(point1, point2);
-                //                    return;
-                //                }
-                //            }
-                //        }
+                        var box = new Box()
+                        {
+                            Figures = figures,
+                            I = i,
+                            J = j
+                        };
 
-                //        if (fruits[i, j] == fruits[i, j + 1])
-                //        {
-                //            if (i < 7 & j > 0 & j < 7)
-                //            {
-                //                if (fruits[i, j] == fruits[i + 1, j - 1])
-                //                {
-                //                    Point point1 = new Point(j * _cellSize - 20, i * _cellSize + 60);
-                //                    Point point2 = new Point(j * _cellSize - 20, i * _cellSize + 20);
-                //                    mouse.MoveShape(point1, point2);
-                //                    return;
-                //                }
-                //                else if (fruits[i, j] == fruits[i + 1, j + 2])
-                //                {
-                //                    Point point1 = new Point(j * _cellSize + 100, i * _cellSize + 60);
-                //                    Point point2 = new Point(j * _cellSize + 100, i * _cellSize + 20);
-                //                    mouse.MoveShape(point1, point2);
-                //                    return;
-                //                }
-                //            }
-                //            if (i > 0 & j > 0 & j < 7)
-                //            {
-                //                if (fruits[i, j] == fruits[i - 1, j - 1])
-                //                {
-                //                    Point point1 = new Point(j * _cellSize - 20, i * _cellSize - 20);
-                //                    Point point2 = new Point(j * _cellSize - 20, i * _cellSize + 20);
-                //                    mouse.MoveShape(point1, point2);
-                //                    return;
-                //                }
-                //                else if (fruits[i, j] == fruits[i - 1, j + 2])
-                //                {
-                //                    Point point1 = new Point(j * _cellSize + 100, i * _cellSize - 20);
-                //                    Point point2 = new Point(j * _cellSize + 100, i * _cellSize + 20);
-                //                    mouse.MoveShape(point1, point2);
-                //                    return;
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
-                #endregion
+                        foreach (var item in commandService.GetCommands())
+                        {
+                            if (item.Contains(box))
+                            {
+                                item.Execute(mouse);
+                                return;
+                            }
+                        }
+                    }
+                }              
             }
         }
 
@@ -302,7 +248,7 @@ namespace Match3Bot
             {
                 for (int j = 0; j < _sizePlayingFieldInFigures; j++)
                 {
-                    Console.Write(fruits[i, j]);
+                    Console.Write(figures[i, j]);
                 }
                 Console.WriteLine();
             }

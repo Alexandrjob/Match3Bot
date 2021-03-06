@@ -1,7 +1,6 @@
-﻿using Match3Bot.Service.Commands;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Match3Bot
+namespace Match3Bot.Service.Commands
 {
     class CommandService: ICommandService
     {
@@ -11,7 +10,8 @@ namespace Match3Bot
         {
             _commands = new List<СombinationCommand>
             {
-                new BetweenTwoFiguresCommand(),
+                //new BetweenTwoFiguresCommand(),
+                new LeftLightFigure()
             };
         }
 

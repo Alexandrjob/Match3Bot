@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Match3Bot
+namespace Match3Bot.Service
 {
     public abstract class СombinationCommand
     {
@@ -9,8 +9,8 @@ namespace Match3Bot
         public virtual Point Point1 { get; set; }
         public virtual Point Point2 { get; set; }
 
-        public abstract void Execute(int[,] fruits, Mouse mouse);
+        public abstract void Execute(Mouse mouse);
 
-        public abstract bool Contains(int[,] fruits);
+        public abstract bool Contains(Box box);
     }
 }
