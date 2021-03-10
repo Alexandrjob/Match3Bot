@@ -67,8 +67,8 @@ namespace Match3Bot
                 {
                     isStopGame = true;
                 }
-                ShowArray();
-                Thread.Sleep(1000);
+                //ShowArray();
+                Thread.Sleep(500);
             }
         }
 
@@ -221,7 +221,7 @@ namespace Match3Bot
             {
                 for (int i = 0; i < _sizePlayingFieldInFigures; i++)
                 {
-                    for (int j = 0; j < _sizePlayingFieldInFigures - 2; j++)
+                    for (int j = 0; j < _sizePlayingFieldInFigures; j++)
                     {
                         var box = new Box()
                         {
@@ -239,7 +239,7 @@ namespace Match3Bot
                             }
                         }
                     }
-                }              
+                }
             }
         }
 

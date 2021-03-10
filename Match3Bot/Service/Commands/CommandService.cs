@@ -10,7 +10,7 @@ namespace Match3Bot.Service.Commands
         {
             _commands = new List<СombinationCommand>
             {
-                //new BetweenTwoFiguresCommand(),
+                new BetweenTwoFiguresCommand(),
                 new LeftLightFigure()
             };
         }

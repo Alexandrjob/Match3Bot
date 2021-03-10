@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using Match3Bot.Models;
+using System.Drawing;
 
 namespace Match3Bot.Service
 {

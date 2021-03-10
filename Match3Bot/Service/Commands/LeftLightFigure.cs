@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using Match3Bot.Models;
+using System.Drawing;
 
 namespace Match3Bot.Service.Commands
 {
@@ -10,9 +11,9 @@ namespace Match3Bot.Service.Commands
             var i = box.I;
             var j = box.J;
 
-            if (figures[i, j] == figures[i, j + 1])
+            if (i < 7 && j > 0 && j < 6)
             {
-                if (i < 7 & j > 0 & j < 7)
+                if (figures[i, j] == figures[i, j + 1])
                 {
                     if (figures[i, j] == figures[i + 1, j - 1])
                     {
@@ -27,7 +28,11 @@ namespace Match3Bot.Service.Commands
                         return true;
                     }
                 }
-                if (i > 0 & j > 0 & j < 7)
+            }
+
+            if (i > 0 && j > 0 && j < 6)
+            {
+                if (figures[i, j] == figures[i, j + 1])
                 {
                     if (figures[i, j] == figures[i - 1, j - 1])
                     {
